@@ -4,10 +4,10 @@ import type { Batch, BotState, OrderInput, Pubkey } from './vendor/makefun-bot.t
 const TAPE_LEN = 20;
 const MIN_REAL_RESERVES = 2n * LAMPORTS_PER_SOL;
 const MAX_REAL_RESERVES = 50n * LAMPORTS_PER_SOL;
-const BUY_QUOTE = (3n * LAMPORTS_PER_SOL) / 100n; // 0.03 SOL
+const BUY_QUOTE = LAMPORTS_PER_SOL / 40n; // 0.025 SOL
 const MIN_BUY_QUOTE = LAMPORTS_PER_SOL / 100n; // 0.01 SOL
 const FEE_RESERVE = LAMPORTS_PER_SOL / 200n; // 0.005 SOL kept back for fees
-const FLAT_SLOTS = 8000;
+const FLAT_SLOTS = 6000;
 const SLIPPAGE_BUY = 2000;
 const SLIPPAGE_TP = 1500;
 const SLIPPAGE_SL = 10000;
@@ -85,7 +85,7 @@ function onBatch(state: BotState, batch: Batch): OrderInput[] {
     const basis = hold.cost_lamports + txFee;
 
     let slippage = 0;
-    if (mark * 100n >= basis * 130n) slippage = SLIPPAGE_TP;
+    if (mark * 100n >= basis * 125n) slippage = SLIPPAGE_TP;
     else if (mark * 100n <= basis * 88n) slippage = SLIPPAGE_SL;
     else if (state.slot - (entrySlot.get(mint) ?? state.slot) >= FLAT_SLOTS) slippage = SLIPPAGE_FLAT;
     if (slippage === 0) continue;
@@ -126,7 +126,7 @@ function onBatch(state: BotState, batch: Batch): OrderInput[] {
       }
     }
     if (buys < 3) continue;
-    if (buySol * 5n < sellSol * 7n) continue; // buy SOL >= 1.4x sell SOL
+    if (buySol * 2n < sellSol * 3n) continue; // buy SOL >= 1.5x sell SOL
     let quote = state.maxBuyLamports(mint);
     if (quote > BUY_QUOTE) quote = BUY_QUOTE;
     if (quote < MIN_BUY_QUOTE) continue;
